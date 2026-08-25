@@ -1,37 +1,33 @@
-name: Extract Android ZIP
+name: Extract Android ZIP on Push
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
 
 jobs:
   extract-zip:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Check if ZIP file exists
-        id: check_zip
+      - name: Download ZIP file
         run: |
           if [ -f "GestorImobiliario-android.zip" ]; then
-            echo "ZIP file exists"
-            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "ZIP file found."
           else
-            echo "ZIP file does not exist"
-            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Error: GestorImobiliario-android.zip not found!"
+            exit 1
           fi
 
       - name: Extract ZIP file
-        if: steps.check_zip.outputs.exists == 'true'
         run: |
-          unzip -o GestorImobiliario-android.zip -d GestorImobiliario-android/
-          ls -la GestorImobiliario-android/
+          unzip -o GestorImobiliario-android.zip -d GestorImobiliario-android
 
-      - name: Upload extracted files as artifact
-        if: steps.check_zip.outputs.exists == 'true'
-        uses: actions/upload-artifact@v3
+      - name: Upload extracted files
+        uses: actions/upload-artifact@v4
         with:
           name: extracted-android-files
           path: GestorImobiliario-android/
+          retention-days: 7
